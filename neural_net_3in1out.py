@@ -1,13 +1,17 @@
 from numpy import random, dot, exp, array
+import matplotlib.pyplot as plt
 
-
+# 31 because it has 3 inputs and 1 output
 class NeuralNetwork():
 
 	def __init__(self):
 
+		# fixing the random seed for reproducibility
 		random.seed(1)
 
+		# inizializing uniform random weights in the interval [-1, 1]
 		self.synaptic_weights = 2 * random.random((3,1)) - 1
+		self.error_history = []
 
 
 	def __sigmoid(self, x):
@@ -20,12 +24,19 @@ class NeuralNetwork():
 
 	def train(self, given_input, given_output, epochs):
 
+		self.error_history.clear()
+
+		# train cycle
 		for i in range(epochs):
 
+			# one forward pass of all the inputs. Batch processing.
 			output = self.forward(given_input)
 
-			error = given_output - output
+			# the difference is the error
+			error = output - given_output 
+			self.error_history.append(error.mean())
 
+			# calculating the gradient
 			adjustement = dot(given_input.T, error * self.__sigmoid_derivative(output))
 
 			self.synaptic_weights += adjustement
@@ -33,6 +44,7 @@ class NeuralNetwork():
 
 	def forward(self, inputs):
 		return self.__sigmoid(dot(inputs, self.synaptic_weights))
+
 
 
 
@@ -47,10 +59,14 @@ def main():
 	training_set_outputs = array([[0, 1, 1, 0]]).T
 
 	# let's train the network
-	neural_network.train(training_set_inputs, training_set_outputs, 10000)
+	neural_network.train(training_set_inputs, training_set_outputs, 2000)
 
-	print("Weights are: ",neural_network.synaptic_weights)
-	print("outputs is: ", neural_network.forward(training_set_inputs))
+	print("Weights are:\n",neural_network.synaptic_weights)
+	print("Outputs is:\n", neural_network.forward(training_set_inputs))
+
+	plt.plot(neural_network.error_history)
+	plt.grid()
+	plt.show()
 
 if __name__ == '__main__':
 	main()
